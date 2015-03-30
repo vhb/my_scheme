@@ -4,18 +4,8 @@ import Debug.Trace
 import Control.Monad
 import qualified Data.Vector as Vec
 import Numeric (readOct, readHex)
+import Types
 
-
-data LispVal = Atom String
-  | List [LispVal]
-  | DottedList [LispVal] LispVal
-  | Vector (Vec.Vector LispVal)
-  | Number Integer
-  | String String
-  | Bool Bool
-  | Char Char
-  | Float Float
-  deriving (Show)
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
@@ -37,7 +27,7 @@ parseBool = do
       't' -> Bool True
       'f' -> Bool False
 
-retParseNumber = return . Number . (\x -> fst $ x !! 0)
+retParseNumber = return . Number . fst . head
 
 parseHexNumber :: Parser LispVal
 parseHexNumber = do
@@ -157,7 +147,7 @@ parseExpr = parseString
 
 {- TODO: add support for all numeric types: long, etc...  -}
 
-readExpr :: String -> String
+readExpr :: String -> LispVal
 readExpr input = case parse parseExpr "lisp" input of
-  Left err -> "No match: " ++ show err
-  Right val -> ("Found value: " ++ show val)
+  Left err -> String $ "No match: " ++ show err
+  Right val -> val
