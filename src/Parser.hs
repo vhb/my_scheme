@@ -1,11 +1,13 @@
 module Parser where
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Debug.Trace
+import Control.Monad.Error
 import Control.Monad
 import qualified Data.Vector as Vec
 import Numeric (readOct, readHex)
-import Types
 
+import Types
+import Errors
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
@@ -147,7 +149,7 @@ parseExpr = parseString
 
 {- TODO: add support for all numeric types: long, etc...  -}
 
-readExpr :: String -> LispVal
+readExpr :: String -> ThrowsError LispVal
 readExpr input = case parse parseExpr "lisp" input of
-  Left err -> String $ "No match: " ++ show err
-  Right val -> val
+  Left err -> throwError $ Parser err
+  Right val -> return val
